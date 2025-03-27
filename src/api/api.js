@@ -93,5 +93,5 @@ class ApiService {
     }
 }
 
-const apiService = new ApiService('http://localhost:5000');
+const apiService = new ApiService('https://docs-sn-backend.vercel.app');
 export default apiService;
