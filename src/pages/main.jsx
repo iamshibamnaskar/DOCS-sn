@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import apiService from '../api/api';
 import { v4 as uuidv4 } from 'uuid';
 import PulseLoadingAnimation from '../components/pulseLoading';
+import { auth } from '../firebase';
+import {toast} from 'react-hot-toast'
+import { signOut } from 'firebase/auth';
 
 function MainPage() {
   const navigate = useNavigate();
@@ -13,13 +16,28 @@ function MainPage() {
   const [drafts, setDrafts] = useState([]);
   const [loading, Setloading] = useState(true)
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // console.log("User signed out successfully");
+      Cookies.remove("jwt");
+      Cookies.remove("folder");
+      Cookies.remove("token");
+      Cookies.remove('refreshToken');
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   useEffect(() => {
     const verifyToken = async () => {
       const jwt = Cookies.get("jwt");
       if (jwt) {
         try {
           const response = await apiService.getAuthData(jwt);
-          console.log("Token Verified:", response);
+          // console.log("Token Verified:", response);
+          
         } catch (error) {
           console.error("Invalid or Expired Token:", error);
           Cookies.remove("jwt");
@@ -35,9 +53,15 @@ function MainPage() {
       const jwt = Cookies.get("jwt");
       if (token) {
         try {
-          const response = await apiService.getFiles(token,jwt);
-          console.log("files:", response);
-          Setfiles(response.files);
+          const response = await apiService.getFiles(token, jwt);
+          // console.log("files:", response);
+          if (response.files == undefined){
+            // console.log("Session expired")
+            toast.error("Session Expired Please Login again");
+            handleLogout()
+          }else{
+            Setfiles(response.files);
+          }
         } catch (error) {
           console.error("Invalid or Expired Token:", error);
         } finally {
@@ -51,7 +75,7 @@ function MainPage() {
     const getDrafts = () => {
       const savedDrafts = JSON.parse(localStorage.getItem("editorDrafts")) || [];
       const sortedDrafts = savedDrafts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      console.log("Sorted Drafts:", sortedDrafts);
+      // console.log("Sorted Drafts:", sortedDrafts);
       setDrafts(sortedDrafts);
     };
 

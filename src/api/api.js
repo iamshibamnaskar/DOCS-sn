@@ -1,3 +1,4 @@
+
 class ApiService {
     constructor(baseURL) {
         this.baseURL = baseURL;
@@ -37,7 +38,7 @@ class ApiService {
         }
     }
 
-    async createFolder(token,jwt) {
+    async createFolder(token, jwt) {
         try {
             const response = await fetch(`${this.baseURL}/drive/create-folder`, {
                 method: 'POST',
@@ -55,7 +56,7 @@ class ApiService {
         }
     }
 
-    async getFiles(token,jwt) {
+    async getFiles(token, jwt) {
         try {
             const response = await fetch(`${this.baseURL}/drive/list-files`, {
                 method: 'POST',
@@ -73,7 +74,7 @@ class ApiService {
         }
     }
 
-    async insertFile(token,html,name,jwt) {
+    async insertFile(token, html, name, jwt) {
         try {
             const response = await fetch(`${this.baseURL}/drive/upload-doc`, {
                 method: 'POST',
@@ -81,7 +82,7 @@ class ApiService {
                     'Content-Type': 'application/json',
                     'Authorization': `${jwt}`,
                 },
-                body: JSON.stringify({ token: token,htmlContent:html,fileName:name }),
+                body: JSON.stringify({ token: token, htmlContent: html, fileName: name }),
             });
             // console.log(await response.json())
             return await response.json();
@@ -91,6 +92,8 @@ class ApiService {
             throw error;
         }
     }
+
+    
 }
 
 const apiService = new ApiService('https://docs-sn-backend.vercel.app');

@@ -5,6 +5,8 @@ import JoditEditor from "jodit-react";
 import Cookies from 'js-cookie';
 import apiService from '../api/api';
 import { toast } from 'react-hot-toast';
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 function EditorPage() {
     const { id } = useParams();
@@ -15,6 +17,20 @@ function EditorPage() {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [loadingDraft, setLoadingDraft] = useState(false);
     const [loadingDrive, setLoadingDrive] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+          await signOut(auth);
+        //   console.log("User signed out successfully");
+          Cookies.remove("jwt");
+          Cookies.remove("folder");
+          Cookies.remove("token");
+          Cookies.remove('refreshToken');
+          navigate("/");
+        } catch (error) {
+          console.error("Error during logout:", error);
+        }
+      };
 
     useEffect(() => {
         if (id) {
@@ -72,7 +88,11 @@ function EditorPage() {
             if (response && response.fileId !== undefined) {
                 toast.success("File saved to Google Drive!");
             } else {
-                throw new Error(response.statusText || "Failed to save to Google Drive.");
+                saveDraft(false)
+                toast.error("Session Expired. Please login again. Don't panic, your document is saved as a draft.", {
+                    duration: 4000,
+                  });
+                handleLogout()
             }
         } catch (error) {
             console.error("Error saving to Google Drive:", error);

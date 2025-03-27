@@ -11,6 +11,7 @@ import googleLogo from "../assets/google.png";
 function LoginPage() {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
+    const [loading,Setloading] = useState(false)
 
     const handleGoogleLogin = async (e) => {
         e.preventDefault();
@@ -19,36 +20,39 @@ function LoginPage() {
 
         try {
             // Sign In with Google Popup
+            Setloading(true)
             const result = await signInWithPopup(auth, provider);
             const credential = GoogleAuthProvider.credentialFromResult(result);
             const token0 = credential.accessToken; // Access Token
             const refreshToken = result.user.stsTokenManager.refreshToken; // Refresh Token
             const jwtToken = result.user.stsTokenManager.accessToken; // JWT Token from Firebase
             
-            console.log("Access Token:", token0);
-            console.log("Refresh Token:", refreshToken);
+            // console.log("Access Token:", token0);
+            // console.log("Refresh Token:", refreshToken);
 
             // Store Tokens in Cookies
             Cookies.set("token", token0, { expires: 7 }); // Access Token (7 Days)
             Cookies.set("refreshToken", refreshToken, { expires: 14 }); // Refresh Token (14 Days)
             
             setUser(result.user);
-            console.log("User Info:", result.user);
+            // console.log("User Info:", result.user);
 
             // Send JWT to Backend for Verification
             const response = await ApiService.postGoogleAuth(jwtToken);
-            console.log("Backend Response:", response);
+            // console.log("Backend Response:", response);
 
             // Store JWT in Cookies
             Cookies.set("jwt", response.jwt, { expires: 7 });
 
             // Create Folder in Google Drive
             const folderinfo = await ApiService.createFolder(token0, response.jwt);
-            console.log("Folder Info:", folderinfo);
+            // console.log("Folder Info:", folderinfo);
 
             Cookies.set("folder", folderinfo.folderId, { expires: 7 });
+            Setloading(false)
             navigate("/main");
         } catch (error) {
+            Setloading(false)
             console.error("Login Failed:", error);
         }
     };
@@ -60,7 +64,7 @@ function LoginPage() {
             if (jwt) {
                 try {
                     const response = await ApiService.getAuthData(jwt);
-                    console.log("Token Verified:", response);
+                    // console.log("Token Verified:", response);
                     navigate("/main");
                 } catch (error) {
                     console.error("Invalid or Expired Token:", error);
@@ -88,7 +92,7 @@ function LoginPage() {
                             className="flex w-full justify-center items-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             <img src={googleLogo} alt="Google Logo" className="h-5 w-5" />
-                            <span>Continue with Google</span>
+                            <span>{loading?"Loging in please wait..":"Continue with Google"}</span>
                         </button>
                     </div>
                 </form>

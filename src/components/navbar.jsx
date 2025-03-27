@@ -11,7 +11,7 @@ function Navbar() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            console.log("User signed out successfully");
+            // console.log("User signed out successfully");
             Cookies.remove("jwt");
             Cookies.remove("folder");
             Cookies.remove("token");
